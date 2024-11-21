@@ -10,56 +10,38 @@
       google.charts.setOnLoadCallback(drawChart);
 
       function drawChart() {
-        // Requête pour récupérer les données de l'API /commits/
+        // Récupérer les données depuis la route Flask
         fetch("/commits/")
           .then((response) => response.json())
           .then((data) => {
             // Préparer les données pour Google Charts
-            const chartData = [["Minute", "Commits", { role: "style" }]];
+            const chartData = [["Minute", "Commits"]];
             data.results.forEach((entry) => {
-              // Ajouter une couleur aléatoire pour chaque barre
-              const color = "#" + Math.floor(Math.random() * 16777215).toString(16);
-              chartData.push([entry.minute.toString(), entry.count, color]);
+              chartData.push([entry.minute.toString(), entry.count]);
             });
 
-            // Convertir les données en tableau utilisable par Google Charts
+            // Convertir les données en tableau Google Charts
             const dataTable = google.visualization.arrayToDataTable(chartData);
-
-            // Ajouter des annotations sur chaque barre
-            const view = new google.visualization.DataView(dataTable);
-            view.setColumns([
-              0,
-              1,
-              {
-                calc: "stringify",
-                sourceColumn: 1,
-                type: "string",
-                role: "annotation",
-              },
-              2,
-            ]);
 
             // Options du graphique
             const options = {
               title: "Nombre de commits par minute",
-              width: 900,
-              height: 400,
-              bar: { groupWidth: "95%" },
-              legend: { position: "none" },
               hAxis: { title: "Minute" },
-              vAxis: { title: "Nombre de Commits" },
+              vAxis: { title: "Nombre de commits" },
+              legend: { position: "none" },
             };
 
             // Dessiner le graphique
             const chart = new google.visualization.ColumnChart(
-              document.getElementById("columnchart_values")
+              document.getElementById("chart_div")
             );
-            chart.draw(view, options);
+            chart.draw(dataTable, options);
           });
       }
     </script>
   </head>
   <body>
-    <div id="columnchart_values" style="width: 900px; height: 300px;"></div>
+    <h1>Graphique des Commits</h1>
+    <div id="chart_div" style="width: 900px; height: 500px;"></div>
   </body>
 </html>
