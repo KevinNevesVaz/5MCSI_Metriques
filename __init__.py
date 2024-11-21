@@ -41,8 +41,8 @@ def commits():
     url = "https://api.github.com/repos/KevinNevesVaz/5MCSI_Metriques/commits"
     
     # Requête pour récupérer les commits
-    response = requests.get(url)
-    commits_data = response.json()
+    response = urlopen(url)
+    commits_data = json.loads(response.read().decode('utf-8'))
     
     # Extraire les minutes de chaque commit
     minutes = []
@@ -52,6 +52,7 @@ def commits():
         minutes.append(date_object.minute)
     
     # Compter le nombre de commits par minute
+    from collections import Counter
     commit_counts = Counter(minutes)
     
     # Transformer les données en liste pour le graphique
