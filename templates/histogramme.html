@@ -1,59 +1,57 @@
-<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-<script type="text/javascript">
-  // Charger la bibliothèque de Google Charts
-  google.charts.load("current", { packages: ["corechart"] });
-  google.charts.setOnLoadCallback(fetchAndDrawChart);
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Histogramme des températures</title>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script>
+      google.charts.load('current', { packages: ['corechart'] });
+      google.charts.setOnLoadCallback(drawHistogram);
 
-  function fetchAndDrawChart() {
-    // URL de l'API (remplacez `xxx` par votre clé API réelle)
-    const apiUrl = "https://samples.openweathermap.org/data/2.5/forecast?lat=0&lon=0&appid=xxx";
+      function drawHistogram() {
+        function drawChart(data) {
+          // Convertir les données récupérées en un tableau utilisable par Google Charts
+          var dataTable = new google.visualization.DataTable();
+          dataTable.addColumn('string', 'Date');
+          dataTable.addColumn('number', 'Température (°C)');
 
-    // Récupération des données de l'API
-    fetch(apiUrl)
-      .then(response => response.json())
-      .then(data => {
-        const weatherData = data.list.map(entry => [
-          entry.dt_txt, // Date et heure
-          entry.main.temp, // Température
-          "color: #76A7FA" // Couleur des barres
-        ]);
+          // Ajouter les données de l'API
+          data.results.forEach(entry => {
+            var date = new Date(entry.Jour * 1000); // Conversion du timestamp en date
+            dataTable.addRow([date.toLocaleDateString(), entry.temp]);
+          });
 
-        // Ajouter les en-têtes pour Google Charts
-        weatherData.unshift(["Date", "Température (K)", { role: "style" }]);
+          // Options de l'histogramme
+          var options = {
+            title: "Évolution des températures de la ville de Tawarano",
+            legend: { position: "none" },
+            hAxis: {
+              title: "Date",
+              slantedText: true,
+              slantedTextAngle: 45
+            },
+            vAxis: {
+              title: "Température (°C)"
+            },
+            histogram: { bucketSize: 5 }
+          };
 
-        drawChart(weatherData);
-      })
-      .catch(error => console.error("Erreur lors de la récupération des données :", error));
-  }
+          // Dessiner l'histogramme
+          var chart = new google.visualization.Histogram(document.getElementById('chart_div'));
+          chart.draw(dataTable, options);
+        }
 
-  function drawChart(weatherData) {
-    // Convertir les données pour Google Charts
-    const data = google.visualization.arrayToDataTable(weatherData);
-
-    // Options du graphique
-    const options = {
-      title: "Prévisions de température (K) par heure",
-      width: 800,
-      height: 400,
-      bar: { groupWidth: "95%" },
-      legend: { position: "none" },
-      hAxis: {
-        title: "Date et Heure",
-        slantedText: true,
-        slantedTextAngle: 45,
-      },
-      vAxis: {
-        title: "Température (Kelvin)"
+        // Récupérer les données de l'API `/tawarano/`
+        fetch('/tawarano/')
+          .then(response => response.json())
+          .then(data => {
+            drawChart(data);
+          });
       }
-    };
-
-    // Dessiner le graphique
-    const chart = new google.visualization.ColumnChart(
-      document.getElementById("temperature_chart")
-    );
-    chart.draw(data, options);
-  }
-</script>
-
-<!-- Conteneur pour le graphique -->
-<div id="temperature_chart" style="width: 800px; height: 400px;"></div>
+    </script>
+  </head>
+  <body>
+    <h2>Histogramme des températures</h2>
+    <div id="chart_div" style="width: 900px; height: 500px;"></div>
+  </body>
+</html>
