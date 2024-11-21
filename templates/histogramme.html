@@ -2,42 +2,45 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>Histogramme des températures</title>
+    <title>Graphique des températures</title>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script>
       google.charts.load('current', { packages: ['corechart'] });
-      google.charts.setOnLoadCallback(drawHistogram);
+      google.charts.setOnLoadCallback(drawChart);
 
-      function drawHistogram() {
-        function drawChart(data) {
-          // Convertir les données récupérées en un tableau utilisable par Google Charts
+      function drawChart() {
+        // Fonction pour dessiner le graphique
+        function processChartData(data) {
           var dataTable = new google.visualization.DataTable();
           dataTable.addColumn('string', 'Date');
           dataTable.addColumn('number', 'Température (°C)');
 
-          // Ajouter les données de l'API
+          // Ajouter les données au tableau
           data.results.forEach(entry => {
             var date = new Date(entry.Jour * 1000); // Conversion du timestamp en date
-            dataTable.addRow([date.toLocaleDateString(), entry.temp]);
+            var formattedDate = date.toLocaleDateString(); // Format lisible
+            dataTable.addRow([formattedDate, entry.temp]);
           });
 
-          // Options de l'histogramme
+          // Options du graphique
           var options = {
-            title: "Évolution des températures de la ville de Tawarano",
-            legend: { position: "none" },
+            title: 'Évolution des températures de Tawarano',
             hAxis: {
-              title: "Date",
+              title: 'Date',
               slantedText: true,
-              slantedTextAngle: 45
+              slantedTextAngle: 45,
             },
             vAxis: {
-              title: "Température (°C)"
+              title: 'Température (°C)',
+              minValue: 0,
             },
-            histogram: { bucketSize: 5 }
+            legend: { position: 'none' },
+            colors: ['#76A7FA'],
+            bar: { groupWidth: '75%' },
           };
 
-          // Dessiner l'histogramme
-          var chart = new google.visualization.Histogram(document.getElementById('chart_div'));
+          // Création du graphique
+          var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
           chart.draw(dataTable, options);
         }
 
@@ -45,13 +48,13 @@
         fetch('/tawarano/')
           .then(response => response.json())
           .then(data => {
-            drawChart(data);
+            processChartData(data);
           });
       }
     </script>
   </head>
   <body>
-    <h2>Histogramme des températures</h2>
+    <h2>Graphique des températures</h2>
     <div id="chart_div" style="width: 900px; height: 500px;"></div>
   </body>
 </html>
