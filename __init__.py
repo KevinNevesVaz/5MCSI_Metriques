@@ -53,6 +53,11 @@ def commits():
     # Format des données pour l'API
     results = [{"minute": minute, "count": count} for minute, count in sorted(minute_counts.items())]
     return jsonify(results=results)
+
+@app.route('/commits_page/')
+def commits_page():
+    return render_template('commits.html')
+
   
 if __name__ == "__main__":
   app.run(debug=True)
