@@ -1,0 +1,59 @@
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript">
+  // Charger la bibliothèque de Google Charts
+  google.charts.load("current", { packages: ["corechart"] });
+  google.charts.setOnLoadCallback(fetchAndDrawChart);
+
+  function fetchAndDrawChart() {
+    // URL de l'API (remplacez `xxx` par votre clé API réelle)
+    const apiUrl = "https://samples.openweathermap.org/data/2.5/forecast?lat=0&lon=0&appid=xxx";
+
+    // Récupération des données de l'API
+    fetch(apiUrl)
+      .then(response => response.json())
+      .then(data => {
+        const weatherData = data.list.map(entry => [
+          entry.dt_txt, // Date et heure
+          entry.main.temp, // Température
+          "color: #76A7FA" // Couleur des barres
+        ]);
+
+        // Ajouter les en-têtes pour Google Charts
+        weatherData.unshift(["Date", "Température (K)", { role: "style" }]);
+
+        drawChart(weatherData);
+      })
+      .catch(error => console.error("Erreur lors de la récupération des données :", error));
+  }
+
+  function drawChart(weatherData) {
+    // Convertir les données pour Google Charts
+    const data = google.visualization.arrayToDataTable(weatherData);
+
+    // Options du graphique
+    const options = {
+      title: "Prévisions de température (K) par heure",
+      width: 800,
+      height: 400,
+      bar: { groupWidth: "95%" },
+      legend: { position: "none" },
+      hAxis: {
+        title: "Date et Heure",
+        slantedText: true,
+        slantedTextAngle: 45,
+      },
+      vAxis: {
+        title: "Température (Kelvin)"
+      }
+    };
+
+    // Dessiner le graphique
+    const chart = new google.visualization.ColumnChart(
+      document.getElementById("temperature_chart")
+    );
+    chart.draw(data, options);
+  }
+</script>
+
+<!-- Conteneur pour le graphique -->
+<div id="temperature_chart" style="width: 800px; height: 400px;"></div>
