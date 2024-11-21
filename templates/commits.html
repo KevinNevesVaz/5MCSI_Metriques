@@ -1,53 +1,39 @@
-<!DOCTYPE html>
-<html lang="fr">
+<html>
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Graphique des Commits</title>
+    <title>Commits par minute</title>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        margin: 20px;
-      }
-      #chart_div {
-        width: 100%;
-        max-width: 800px;
-        height: 500px;
-        margin: auto;
-      }
-    </style>
   </head>
   <body>
-    <h1>Quantité de Commits par Minute</h1>
     <div id="chart_div"></div>
     <script>
       google.charts.load('current', { packages: ['corechart'] });
       google.charts.setOnLoadCallback(drawChart);
 
       function drawChart() {
-        // Récupérer les données via l'API
-        fetch('/commits-data/')
+        // Récupération des données depuis l'API /commits/
+        fetch('/commits/')
           .then(response => response.json())
           .then(data => {
-            // Préparer les données pour Google Charts
-            const dataTable = new google.visualization.DataTable();
+            // Convertir les données en tableau pour Google Charts
+            var dataTable = new google.visualization.DataTable();
             dataTable.addColumn('string', 'Minute');
-            dataTable.addColumn('number', 'Commits');
-            data.results.forEach(item => {
-              dataTable.addRow([item.minute.toString(), item.count]);
+            dataTable.addColumn('number', 'Nombre de Commits');
+
+            data.results.forEach(entry => {
+              dataTable.addRow([entry.minute.toString(), entry.count]);
             });
 
             // Options du graphique
-            const options = {
-              title: 'Commits par Minute',
+            var options = {
+              title: 'Activité des Commits par Minute',
               hAxis: { title: 'Minute' },
               vAxis: { title: 'Nombre de Commits' },
-              legend: 'none'
+              legend: { position: 'none' }
             };
 
-            // Dessiner le graphique
-            const chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+            // Dessiner l'histogramme
+            var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
             chart.draw(dataTable, options);
           });
       }
