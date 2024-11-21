@@ -35,35 +35,34 @@ def mongraphique():
 def monhistogramme():
     return render_template("histogramme.html")
 
-# Route pour récupérer les données des commits
-@app.route('/commits-data/')
-def commits_data():
-    # URL de l'API GitHub
-    api_url = "https://api.github.com/repos/KevinNevesVaz/5MCSI_Metriques/commits"
-
-    # Effectuer la requête pour récupérer les commits
-    response = requests.get(api_url)
-    if response.status_code != 200:
-        return jsonify({"error": "Impossible de récupérer les données de l'API GitHub"}), 500
-
-    # Extraire les dates des commits
-    commits = response.json()
-    commit_minutes = []
-    for commit in commits:
-        date_str = commit['commit']['author']['date']
-        date_obj = datetime.strptime(date_str, '%Y-%m-%dT%H:%M:%SZ')
-        commit_minutes.append(date_obj.minute)  # Extraire la minute
-
-    # Compter les occurrences de chaque minute
-    commit_count = Counter(commit_minutes)
-
-    # Convertir le résultat en un format JSON
-    results = [{"minute": minute, "count": count} for minute, count in sorted(commit_count.items())]
-    return jsonify(results=results)
-
-# Route pour afficher le fichier HTML
 @app.route('/commits/')
 def commits():
+    # URL de l'API GitHub
+    url = "https://api.github.com/repos/KevinNevesVaz/5MCSI_Metriques/commits"
+    
+    # Requête pour récupérer les commits
+    response = requests.get(url)
+    commits_data = response.json()
+    
+    # Extraire les minutes de chaque commit
+    minutes = []
+    for commit in commits_data:
+        commit_date = commit['commit']['author']['date']
+        date_object = datetime.strptime(commit_date, '%Y-%m-%dT%H:%M:%SZ')
+        minutes.append(date_object.minute)
+    
+    # Compter le nombre de commits par minute
+    commit_counts = Counter(minutes)
+    
+    # Transformer les données en liste pour le graphique
+    results = [{"minute": minute, "count": count} for minute, count in commit_counts.items()]
+    
+    # Retourner les données au format JSON pour le graphique
+    return jsonify(results=results)
+
+@app.route('/commits-graph/')
+def commits_graph():
+    # Retourne le fichier HTML pour afficher le graphique
     return render_template("commits.html")
   
 if __name__ == "__main__":
