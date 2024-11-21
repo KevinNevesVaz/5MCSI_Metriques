@@ -7,34 +7,49 @@
   <body>
     <div id="chart_div"></div>
     <script>
-      google.charts.load('current', { packages: ['corechart'] });
+      // Charger les graphiques Google Charts
+      google.charts.load('current', { packages: ['corechart', 'charteditor'] });
       google.charts.setOnLoadCallback(drawChart);
 
       function drawChart() {
         // Récupération des données depuis l'API /commits/
         fetch('/commits/')
-          .then(response => response.json())
+          .then(response => response.json())  // Récupération du JSON
           .then(data => {
-            // Convertir les données en tableau pour Google Charts
+            // Créer un tableau de données pour Google Charts
             var dataTable = new google.visualization.DataTable();
-            dataTable.addColumn('string', 'Minute');
-            dataTable.addColumn('number', 'Nombre de Commits');
+            dataTable.addColumn('string', 'Minute');  // Colonne pour l'axe des minutes
+            dataTable.addColumn('number', 'Nombre de Commits');  // Colonne pour l'axe des commits
 
+            // Ajouter les données au tableau
             data.results.forEach(entry => {
+              // Ajoute une ligne pour chaque minute
               dataTable.addRow([entry.minute.toString(), entry.count]);
             });
 
-            // Options du graphique
+            // Options pour personnaliser le graphique
             var options = {
               title: 'Activité des Commits par Minute',
-              hAxis: { title: 'Minute' },
-              vAxis: { title: 'Nombre de Commits' },
-              legend: { position: 'none' }
+              hAxis: {
+                title: 'Minute',  // Titre de l'axe des X (minutes)
+                slantedText: true,  // Incliner le texte pour éviter qu'il ne soit trop long
+                slantedTextAngle: 45
+              },
+              vAxis: {
+                title: 'Nombre de Commits'  // Titre de l'axe des Y (nombre de commits)
+              },
+              legend: { position: 'none' },  // Pas de légende
+              chartArea: { width: '80%', height: '70%' },  // Ajuster la zone du graphique
             };
 
-            // Dessiner l'histogramme
+            // Créer un graphique de type "Histogramme" (Graphique à colonnes)
             var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+
+            // Dessiner le graphique
             chart.draw(dataTable, options);
+          })
+          .catch(error => {
+            console.error('Il y a eu un problème avec la récupération des données:', error);
           });
       }
     </script>
