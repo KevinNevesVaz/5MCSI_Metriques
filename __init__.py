@@ -35,7 +35,7 @@ def mongraphique():
 def monhistogramme():
     return render_template("histogramme.html")
 
-@app.route('/commits')
+@app.route('/commits/')
 def commits():
     return render_template('commits.html')
   
