@@ -56,14 +56,9 @@ def commits():
     
     # Transformer les données en liste pour le graphique
     results = [{"minute": minute, "count": count} for minute, count in commit_counts.items()]
-    
-    # Retourner les données au format JSON pour le graphique
-    return jsonify(results=results)
 
-@app.route('/commits-graph/')
-def commits_graph():
-    # Retourne le fichier HTML pour afficher le graphique
-    return render_template("commits.html")
+    # Retourner les données sous forme de JSON
+    return jsonify(results=results)
   
 if __name__ == "__main__":
   app.run(debug=True)
