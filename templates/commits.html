@@ -1,57 +1,65 @@
+<!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>Commits par minute</title>
+    <title>Graphique des Commits</title>
+    <!-- Chargement de la bibliothèque Google Charts -->
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
-  </head>
-  <body>
-    <div id="chart_div"></div>
-    <script>
-      // Charger les graphiques Google Charts
-      google.charts.load('current', { packages: ['corechart', 'charteditor'] });
+    <script type="text/javascript">
+      google.charts.load("current", { packages: ["corechart"] });
       google.charts.setOnLoadCallback(drawChart);
 
       function drawChart() {
-        // Récupération des données depuis l'API /commits/
-        fetch('/commits/')
-          .then(response => response.json())  // Récupération du JSON
-          .then(data => {
-            // Créer un tableau de données pour Google Charts
-            var dataTable = new google.visualization.DataTable();
-            dataTable.addColumn('string', 'Minute');  // Colonne pour l'axe des minutes
-            dataTable.addColumn('number', 'Nombre de Commits');  // Colonne pour l'axe des commits
-
-            // Ajouter les données au tableau
-            data.results.forEach(entry => {
-              // Ajoute une ligne pour chaque minute
-              dataTable.addRow([entry.minute.toString(), entry.count]);
+        // Requête pour récupérer les données de l'API /commits/
+        fetch("/commits/")
+          .then((response) => response.json())
+          .then((data) => {
+            // Préparer les données pour Google Charts
+            const chartData = [["Minute", "Commits", { role: "style" }]];
+            data.results.forEach((entry) => {
+              // Ajouter une couleur aléatoire pour chaque barre
+              const color = "#" + Math.floor(Math.random() * 16777215).toString(16);
+              chartData.push([entry.minute.toString(), entry.count, color]);
             });
 
-            // Options pour personnaliser le graphique
-            var options = {
-              title: 'Activité des Commits par Minute',
-              hAxis: {
-                title: 'Minute',  // Titre de l'axe des X (minutes)
-                slantedText: true,  // Incliner le texte pour éviter qu'il ne soit trop long
-                slantedTextAngle: 45
+            // Convertir les données en tableau utilisable par Google Charts
+            const dataTable = google.visualization.arrayToDataTable(chartData);
+
+            // Ajouter des annotations sur chaque barre
+            const view = new google.visualization.DataView(dataTable);
+            view.setColumns([
+              0,
+              1,
+              {
+                calc: "stringify",
+                sourceColumn: 1,
+                type: "string",
+                role: "annotation",
               },
-              vAxis: {
-                title: 'Nombre de Commits'  // Titre de l'axe des Y (nombre de commits)
-              },
-              legend: { position: 'none' },  // Pas de légende
-              chartArea: { width: '80%', height: '70%' },  // Ajuster la zone du graphique
+              2,
+            ]);
+
+            // Options du graphique
+            const options = {
+              title: "Nombre de commits par minute",
+              width: 900,
+              height: 400,
+              bar: { groupWidth: "95%" },
+              legend: { position: "none" },
+              hAxis: { title: "Minute" },
+              vAxis: { title: "Nombre de Commits" },
             };
 
-            // Créer un graphique de type "Histogramme" (Graphique à colonnes)
-            var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
-
             // Dessiner le graphique
-            chart.draw(dataTable, options);
-          })
-          .catch(error => {
-            console.error('Il y a eu un problème avec la récupération des données:', error);
+            const chart = new google.visualization.ColumnChart(
+              document.getElementById("columnchart_values")
+            );
+            chart.draw(view, options);
           });
       }
     </script>
+  </head>
+  <body>
+    <div id="columnchart_values" style="width: 900px; height: 300px;"></div>
   </body>
 </html>
