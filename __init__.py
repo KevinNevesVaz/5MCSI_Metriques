@@ -35,31 +35,9 @@ def mongraphique():
 def monhistogramme():
     return render_template("histogramme.html")
 
-@app.route('/commits/')
-def commits():
-    # URL de l'API GitHub
-    url = "https://api.github.com/repos/KevinNevesVaz/5MCSI_Metriques/commits"
-    
-    # Requête pour récupérer les commits
-    response = urlopen(url)
-    commits_data = json.loads(response.read().decode('utf-8'))
-    
-    # Extraire les minutes de chaque commit
-    minutes = []
-    for commit in commits_data:
-        commit_date = commit['commit']['author']['date']
-        date_object = datetime.strptime(commit_date, '%Y-%m-%dT%H:%M:%SZ')
-        minutes.append(date_object.minute)
-    
-    # Compter le nombre de commits par minute
-    from collections import Counter
-    commit_counts = Counter(minutes)
-    
-    # Transformer les données en liste pour le graphique
-    results = [{"minute": minute, "count": count} for minute, count in commit_counts.items()]
-
-    # Retourner les données sous forme de JSON
-    return jsonify(results=results)
+@app.route('/commits_page/')
+def commits_page():
+    return render_template('commits.html')
   
 if __name__ == "__main__":
   app.run(debug=True)
